@@ -4,3 +4,7 @@ version = "0.1.0"
 authors = ["Ahmad-Bamba <ahmad.eb.bamba@gmail.com>"]
 
 [dependencies]
+wiringpi = "0.2.0"
+joy = "0.1.2"
+ctrlc = "3.0.1"
+lazy_static = "0.2.8"
