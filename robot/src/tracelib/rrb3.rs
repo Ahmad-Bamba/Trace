@@ -1,10 +1,8 @@
 use globals;
 use wiringpi::*;
 
-use std::mem;
 use std::thread;
 use std::time::Duration;
-use std::cmp;
 use std::cmp::Ordering;
 
 const MOTOR_DELAY: u64 = 200;
@@ -25,7 +23,7 @@ const OC2_PIN_R2: i8 = 27;
 const TRIGGER_PIN: i8 = 18;
 const ECHO_PIN: i8 = 23;
 
-struct RaspiRobot {
+pub struct RaspiRobot {
     left_pwm: pin::SoftPwmPin<pin::Gpio>,
     right_pwm: pin::SoftPwmPin<pin::Gpio>,
     out_left_one: pin::OutputPin<pin::Gpio>,
@@ -40,7 +38,7 @@ struct RaspiRobot {
 
 //TODO implement IR handling
 impl RaspiRobot {
-    fn new(battery_voltage: f32, motor_voltage: f32, rev: i8) -> RaspiRobot {
+    pub fn new(battery_voltage: f32, motor_voltage: f32, rev: i8) -> RaspiRobot {
         assert!(battery_voltage > motor_voltage);
 
         let mut robot = RaspiRobot {
@@ -97,14 +95,14 @@ impl RaspiRobot {
     }
 
     /// expects input from -1 to 1
-    fn tank_drive(&mut self, left: f32, right: f32) {
+    pub fn tank_drive(&mut self, left: f32, right: f32) {
         assert!(left <= 1f32 && left >= -1f32);
         assert!(right <= 1f32 && right >= -1f32);
 
         self.set_motors(left.abs(), if left > 0f32 { true } else { false }, right.abs(), if right > 0f32 { true } else { false });
     }
 
-    fn arcade_drive(&mut self, throttle: f32, wheel: f32) {
+    pub fn arcade_drive(&mut self, throttle: f32, wheel: f32) {
         assert!(throttle >= -1f32 && throttle <= 1f32);
         assert!(wheel >= -1f32 && wheel <= 1f32);
 
@@ -147,7 +145,7 @@ impl RaspiRobot {
         self.tank_drive(left, right);
     }
 
-    fn stop(&mut self) {
+    pub fn stop(&mut self) {
         self.set_motors(0f32, false, 0f32, false);
     }
 }
