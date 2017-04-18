@@ -44,6 +44,8 @@ fn main() {
 
     let mut stick1 = 0f32;
     let mut stick2 = 0f32;
+    let mut stick3 = 0f32;
+    let mut tank = false;
 
     let mut trace = rrb3::RaspiRobot::new(9f32, 6f32, 2i8);
 
@@ -56,6 +58,11 @@ fn main() {
                     // position from -32767 to 32767
                     match a {
                         1 => stick1 = {
+                            let percent = pos as f32 / 32767 as f32;
+                            //println!("Axis {}: {} {}",  a, pos, percent);
+                            -percent
+                        },
+                        3 => stick3 = {
                             let percent = pos as f32 / 32767 as f32;
                             //println!("Axis {}: {} {}",  a, pos, percent);
                             -percent
@@ -76,11 +83,22 @@ fn main() {
                             println!("Exiting...");
                             process::exit(0);
                         },*/
+                        7 => {
+                            if state {
+                                tank = !tank;
+                                println!("Switched modes!");
+                            }
+                        },
                         _ => pass(),
                     };
                 },
             }
         }
-        trace.tank_drive(scale_deadband(stick1), scale_deadband(stick2));
+        if tank {
+            trace.tank_drive(scale_deadband(stick1), scale_deadband(stick2));
+        } else {
+            trace.arcade_drive(scale_deadband(stick1), scale_deadband(stick3));
+        }
+
     }
 }
