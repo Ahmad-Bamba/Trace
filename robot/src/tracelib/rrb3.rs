@@ -5,7 +5,7 @@ use std::thread;
 use std::time::Duration;
 use std::cmp::Ordering;
 
-const MOTOR_DELAY: u64 = 200;
+const MOTOR_DELAY: u64 = 100;
 const RIGHT_PWM_PIN: u16 = 14;
 const RIGHT_1_PIN: u16  = 10;
 const RIGHT_2_PIN: u16 = 25;
@@ -85,7 +85,7 @@ impl RaspiRobot {
 
         // pause to prevent robot from switching directions too quickly
         if self.old_right_dir != left_dir || self.old_right_dir != right_dir {
-            self.set_driver_pins(0f32, false, 0f32, false);
+            //self.stop();
             thread::sleep(Duration::from_millis(MOTOR_DELAY));
         }
 

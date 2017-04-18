@@ -12,6 +12,14 @@ use std::thread;
 use std::time::Duration;
 use std::process;
 
+fn pass() {
+    thread::sleep(Duration::from_millis(0));
+}
+
+fn scale_deadband(x: f32) -> f32 {
+    if x.abs() < globals::DEADBAND { 0f32 } else { x }
+}
+
 fn main() {
     /// blink rsl while running
     /// automatically ended when main thread exits
@@ -30,6 +38,8 @@ fn main() {
     ctrlc::set_handler(move || {
         println!("message: Exited on user request");
         println!("Exiting...");
+        globals::PI.output_pin(tracelib::globals::RSL_PIN).digital_write(pin::Value::Low);
+        process::exit(0);
     }).expect("Error setting ctrl-c handler!");
 
     let mut stick1 = 0f32;
@@ -37,31 +47,40 @@ fn main() {
 
     let mut trace = rrb3::RaspiRobot::new(9f32, 6f32, 2i8);
 
+    //thread::sleep(Duration::from_secs(2));
+
     loop {
         for ev in &mut stick {
             match ev {
-                joy::Event::Axis(a, p) => {
-                    // is p -100 to 100???
-                    println!("Axis {}: {}",  a, p);
+                joy::Event::Axis(a, pos) => {
+                    // position from -32767 to 32767
                     match a {
-                        1 => stick1 = p as f32 / 100f32,
-                        4 => stick2 = p as f32 / 100f32,
-                        _ => thread::sleep(Duration::from_millis(0)),
+                        1 => stick1 = {
+                            let percent = pos as f32 / 32767 as f32;
+                            //println!("Axis {}: {} {}",  a, pos, percent);
+                            -percent
+                        },
+                        4 => stick2 = {
+                            let percent = pos as f32 / 32767 as f32;
+                            //println!("Axis {}: {} {}",  a, pos, percent);
+                            -percent
+                        },
+                        _ => pass(),
                     };
                 },
                 joy::Event::Button(b, state) => {
-                    if state { println!("Button {} pressed!", b); } else { println!("Button {} released!", b) }
+                    //if state { println!("Button {} pressed!", b); } else { println!("Button {} released!", b) }
                     match b {
-                        8 => {
+                        /*8 => {
                             println!("Exit called by start button!");
                             println!("Exiting...");
                             process::exit(0);
-                        },
-                        _ => thread::sleep(Duration::from_millis(0)),
+                        },*/
+                        _ => pass(),
                     };
                 },
             }
         }
-        trace.arcade_drive(stick1, stick2);
+        trace.tank_drive(scale_deadband(stick1), scale_deadband(stick2));
     }
 }
