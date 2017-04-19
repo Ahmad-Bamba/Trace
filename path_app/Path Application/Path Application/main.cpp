@@ -7,10 +7,10 @@
 #include <playback/PlaybackStruct.h>
 #include <playback/Tofile.h>
 
-#define DT 0.1 // s
+#define DT 0.01 // s
 #define MAX_SPEED 0.2 // m/s
-#define MAX_ACCELERATION 0.5 // m/s^2
-#define MAX_JERK 1.0 // m/s^3
+#define MAX_ACCELERATION 1.0 // m/s^2
+#define MAX_JERK 2 // m/s^3
 #define WHEELBASE_WIDTH 0.09 // m
 
 using fint = int_fast16_t;
@@ -92,12 +92,12 @@ int main(int argc, const char** argv) {
 		}
 	}
 
-	std::cout << "Displaying raw data..." << std::endl;
+	/*std::cout << "Displaying raw data..." << std::endl;
 	for(fint i = 0; i < trajectory_l; i++) {
 		std::cout << "Coords: (" << trajectory[i].x << "," << trajectory[i].y << ")" << "\t" << "Pos: " << trajectory[i].position << 
 			"\t" << "Velocity: " << trajectory[i].velocity << "\t" << "Acceleration: " << trajectory[i].acceleration <<
 			"\t" << "Jerk: " << trajectory[i].jerk << "\t" << "Heading (angle): " << r2d(trajectory[i].heading) << std::endl;
-	}
+	}*/
 
 	std::cout << "Generating left and right inputs..." << std::endl;
 
@@ -120,6 +120,8 @@ int main(int argc, const char** argv) {
 	}
 
 	PlaybackWriter writer(current_marks, "output.txt");
+	std::cout << "Scaling output..." << std::endl;
+	writer.force_scale(1.0);
 	writer.write();
 
 	std::cout << "Cleaning assets..." << std::endl;
