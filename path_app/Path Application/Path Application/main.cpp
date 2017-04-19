@@ -36,7 +36,7 @@ std::array<std::string, 3> split_str(const char* str, size_t size) {
 // takes waypoints as commandline arguments:
 // x, y, and angle in degrees
 int main(int argc, const char** argv) {
-	if(!(argc > 2)){
+	if(!(argc > 2)) {
 		std::cout << "Format: path_app x,y,angle x,y,angle x,y,angle..." << std::endl;
 		std::cout << "Press ENTER to continue" << std::endl;
 		std::cin.get();
@@ -47,15 +47,17 @@ int main(int argc, const char** argv) {
 
 	for(fint i = 1; i < argc; i++) {
 		//std::cout << "Debug: formatting argument: " << argv[i] << std::endl;
-		if(get_char_freq(argv[i], std::string(argv[i]).size(), ',') != 2){
+		if(get_char_freq(argv[i], std::string(argv[i]).size(), ',') != 2) {
 			std::cout << "Format error on point input!" << std::endl << "Format: path_app x,y,angle x,y,angle x,y,angle..." << std::endl;
 			return 1;
 		}
+
 		auto values = split_str(argv[i], std::string(argv[i]).size());
 		std::cout << values[0] << "," << values[1] << "," << values[2] << std::endl;
-		try{
+
+		try {
 			points[i - 1] = Waypoint{ std::stod(values[0]), std::stod(values[1]), d2r(std::stod(values[2])) };
-		}catch(std::exception& e){
+		} catch(std::exception& e) {
 			std::cout << e.what() << std::endl;
 			std::cout << "Invalid token! " << std::endl << "Format: path_app x,y,angle x,y,angle x,y,angle..." << std::endl;
 		}
@@ -72,7 +74,7 @@ int main(int argc, const char** argv) {
 		pathfinder_prepare(points, argc - 1, FIT_HERMITE_CUBIC, PATHFINDER_SAMPLES_FAST, DT, MAX_SPEED, MAX_ACCELERATION, MAX_JERK, &candidate);
 		trajectory_l = candidate.length;
 		trajectory = new Segment[trajectory_l];
-		if(pathfinder_generate(&candidate, trajectory) < 0){
+		if(pathfinder_generate(&candidate, trajectory) < 0) {
 			std::cout << "Fatal error: path could not be generated!" << std::endl;
 			return 2;
 		}
