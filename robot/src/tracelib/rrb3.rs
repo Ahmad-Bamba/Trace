@@ -1,9 +1,13 @@
 use globals;
+use playback;
 use wiringpi::*;
 
 use std::thread;
-use std::time::Duration;
+use std::time::*;
 use std::cmp::Ordering;
+use std::fs::File;
+use std::io::BufRead;
+use std::io::BufReader;
 
 const MOTOR_DELAY: u64 = 100;
 const RIGHT_PWM_PIN: u16 = 14;
@@ -41,7 +45,7 @@ impl RaspiRobot {
     pub fn new(battery_voltage: f32, motor_voltage: f32, rev: i8) -> RaspiRobot {
         assert!(battery_voltage > motor_voltage);
 
-        let mut robot = RaspiRobot {
+        let robot = RaspiRobot {
             left_pwm: globals::PI.soft_pwm_pin(LEFT_PWM_PIN),
             right_pwm: globals::PI.soft_pwm_pin(RIGHT_PWM_PIN),
             out_left_one: globals::PI.output_pin(LEFT_1_PIN),
@@ -143,6 +147,59 @@ impl RaspiRobot {
             }
         }
         self.tank_drive(left, right);
+    }
+
+    /// blocking function that does the actual playback
+    fn play(&mut self, s: &Vec<playback::PlaybackStruct>, reverse: bool) {
+        let start = SystemTime::now();
+        let mut done = false;
+        let mut m = 0usize;
+
+        // hack do while loop
+        while {
+            if reverse {
+                self.tank_drive(s[m].vr, s[m].vl);
+            } else {
+                self.tank_drive(s[m].vl, s[m].vr);
+            }
+
+            if start.elapsed().unwrap() >= Duration::from_millis((s[m + 1usize].t * 1000f32) as u64) {
+                m += 1usize;
+            }
+
+            if m >= s.len() || start.elapsed().unwrap() > Duration::from_millis((s[s.len() - 1].t * 1000f32) as u64) {
+                done = true;
+            }
+
+            done
+        } { }
+    }
+
+    pub fn playback_from_file(&mut self, path: &'static str, reverse: bool) {
+        let outfile = File::open(path).expect(format!("{}{}{}", "Error: file '", path, "' not found!").as_str());
+        let buf = BufReader::new(&outfile);
+        let mut lines: Vec<String> = vec![];
+        for line in buf.lines() {
+            lines.push(line.unwrap());
+        }
+        let playback_vec = match playback::get_vec(&lines) {
+            Ok(v) => v,
+            Err(e) => match e {
+                playback::ParseError::InvalidFormat => {
+                    println!("Error: Invalid Format! playback_from_file() rrb3.rs");
+                    vec![]
+                },
+                playback::ParseError::NaN => {
+                    println!("Error: Not a valid number! playback_from_file() rrb3.rs");
+                    vec![]
+                },
+                playback::ParseError::DataOutofRange => {
+                    println!("Error: Data Element out of range! playback_from_file() rrb3.rs");
+                    vec![]
+                }
+            },
+        };
+        self.play(&playback_vec, reverse);
     }
 
     pub fn stop(&mut self) {

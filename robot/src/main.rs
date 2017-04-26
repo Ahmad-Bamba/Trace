@@ -46,6 +46,7 @@ fn main() {
     let mut stick2 = 0f32;
     let mut stick3 = 0f32;
     let mut tank = false;
+    let mut x = false;
 
     let mut trace = rrb3::RaspiRobot::new(9f32, 6f32, 2i8);
 
@@ -78,11 +79,23 @@ fn main() {
                 joy::Event::Button(b, state) => {
                     //if state { println!("Button {} pressed!", b); } else { println!("Button {} released!", b) }
                     match b {
-                        /*8 => {
+                        8 => {
                             println!("Exit called by start button!");
                             println!("Exiting...");
                             process::exit(0);
-                        },*/
+                        },
+                        1 => {
+                            if state {
+                                println!("Beginning playback from file: {}...", "output.txt");
+                                trace.playback_from_file("output.txt", x);
+                            }
+                        },
+                        2 => {
+                            if state {
+                                x = !x;
+                                println!("Toggled playback reverse: {}", x);
+                            }
+                        },
                         7 => {
                             if state {
                                 tank = !tank;
