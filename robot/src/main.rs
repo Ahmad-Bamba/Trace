@@ -79,15 +79,11 @@ fn main() {
                 joy::Event::Button(b, state) => {
                     //if state { println!("Button {} pressed!", b); } else { println!("Button {} released!", b) }
                     match b {
-                        8 => {
-                            println!("Exit called by start button!");
-                            println!("Exiting...");
-                            process::exit(0);
-                        },
                         1 => {
                             if state {
                                 println!("Beginning playback from file: {}...", "output.txt");
                                 trace.playback_from_file("output.txt", x);
+                                println!("Done playing back from file!!")
                             }
                         },
                         2 => {

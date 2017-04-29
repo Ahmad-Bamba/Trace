@@ -151,6 +151,7 @@ impl RaspiRobot {
 
     /// blocking function that does the actual playback
     fn play(&mut self, s: &Vec<playback::PlaybackStruct>, reverse: bool) {
+        //println!("rrb3.rs {}", line!());
         let start = SystemTime::now();
         let mut done = false;
         let mut m = 0usize;
@@ -159,8 +160,10 @@ impl RaspiRobot {
         while {
             if reverse {
                 self.tank_drive(s[m].vr, s[m].vl);
+                //println!("Moving: {} {}", s[m].vr, s[m].vl);
             } else {
                 self.tank_drive(s[m].vl, s[m].vr);
+                //println!("Moving: {} {}", s[m].vl, s[m].vr);
             }
 
             if start.elapsed().unwrap() >= Duration::from_millis((s[m + 1usize].t * 1000f32) as u64) {
@@ -168,14 +171,17 @@ impl RaspiRobot {
             }
 
             if m >= s.len() || start.elapsed().unwrap() > Duration::from_millis((s[s.len() - 1].t * 1000f32) as u64) {
+                //println!("Done playing back! rrb3.rs {}", line!());
                 done = true;
             }
 
-            done
+            !done
         } { }
+        //println!("rrb3.rs {}", line!());
     }
 
     pub fn playback_from_file(&mut self, path: &'static str, reverse: bool) {
+        //println!("rrb3.rs {}", line!());
         let outfile = File::open(path).expect(format!("{}{}{}", "Error: file '", path, "' not found!").as_str());
         let buf = BufReader::new(&outfile);
         let mut lines: Vec<String> = vec![];
@@ -199,6 +205,7 @@ impl RaspiRobot {
                 }
             },
         };
+        //println!("rrb3.rs {}", line!());
         self.play(&playback_vec, reverse);
     }
 

@@ -21,6 +21,7 @@ fn get_char_freq(text: &String, find: char) -> u8 {
 }
 
 fn get_raw_from_string(text: &String) -> [f32; 3] {
+    //println!("playback.rs {}", line!());
     let mut str_parts = [String::from(""), String::from(""), String::from("")];
     let mut on_index = 0usize;
     let mut ret: [f32; 3] = [0f32, 0f32, 0f32];
@@ -39,6 +40,7 @@ fn get_raw_from_string(text: &String) -> [f32; 3] {
 }
 
 pub fn get_vec(raw: &Vec<String>) -> Result<Vec<PlaybackStruct>, ParseError>  {
+    //println!("playback.rs {}", line!());
     let mut vec: Vec<PlaybackStruct> = vec![];
     for line in raw {
         if get_char_freq(line, ',') != 2 {
@@ -49,9 +51,10 @@ pub fn get_vec(raw: &Vec<String>) -> Result<Vec<PlaybackStruct>, ParseError>  {
             if part.is_nan() {
                 return Err(ParseError::NaN);
             }
-            if !(*part <= 1f32 && *part >= -1f32) {
+            /*println!("{}", *part);
+            if *part > 1f32 || *part < -1f32 {
                 return Err(ParseError::DataOutofRange);
-            }
+            }*/
         }
         vec.push(PlaybackStruct {
             t: parts[0],
@@ -59,5 +62,6 @@ pub fn get_vec(raw: &Vec<String>) -> Result<Vec<PlaybackStruct>, ParseError>  {
             vr: parts[2],
         });
     }
+    //println!("playback.rs {}", line!());
     Ok(vec)
 }
